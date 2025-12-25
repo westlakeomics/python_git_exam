@@ -3,6 +3,17 @@
 本仓库用于“编程操作题”考试：考察候选人对 **Python 基本代码规范（PEP 8 思想）** 与 **GitHub 基础协作流程（分支 / 提交 / PR）** 的掌握。
 
 
+## 📚 重要文档
+
+在开始之前，**请先阅读以下文档**以避免常见错误：
+
+- 🆘 **[FAQ.md](FAQ.md)** - Git 推送权限问题常见问答（必读！）
+- 📘 **[CONTRIBUTING.md](CONTRIBUTING.md)** - 完整贡献指南和 Fork 工作流
+- 🎨 **[VISUAL_GUIDE.md](VISUAL_GUIDE.md)** - 图解 Git 权限问题和工作流
+- ⚙️ **[.github/WORKFLOW.md](.github/WORKFLOW.md)** - 自动化工作流程文档
+
+**⚠️ 如果你遇到 403 权限错误，请查看 [FAQ.md](FAQ.md) 的解决方案！**
+
 ## 🚀 自动化工作流
 
 **本项目已配置完全自动化的 PR 流程！**
