@@ -44,13 +44,13 @@ jobs:
             --body "This PR fixes PEP 8 style issues in src/bad_style.py
 
           Branch: \`$BRANCH\`
-          
+
           Changes will be automatically validated by CI checks:
           - Linting (ruff)
           - Formatting (black)
           - Import sorting (isort)
           - Unit tests (pytest)
-          
+
           Once all checks pass and the PR is merged, the branch will be automatically recorded and cleaned up." \
             --base main \
             --head "$BRANCH"

@@ -54,7 +54,8 @@ jobs:
           echo "$TIMESTAMP - $BRANCH" >> "$RECORD_FILE"
           
           # Sort the file to keep it organized (using temporary file for safety)
-          sort -u "$RECORD_FILE" -o "${RECORD_FILE}.tmp"
+          # Note: We keep all entries to preserve history of multiple merges
+          sort "$RECORD_FILE" -o "${RECORD_FILE}.tmp"
           mv "${RECORD_FILE}.tmp" "$RECORD_FILE"
 
       - name: Commit changes
@@ -75,4 +76,4 @@ jobs:
           BRANCH: ${{ steps.validate.outputs.branch }}
         run: |
           # Delete the remote branch
-          git push origin --delete "$BRANCH" || echo "Branch already deleted"
+          git push origin --delete "$BRANCH" || echo "Failed to delete branch (may be already deleted or insufficient permissions)"
