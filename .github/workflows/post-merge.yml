@@ -1,0 +1,79 @@
+name: Post Merge Actions
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  post-merge:
+    # Only run if the PR was actually merged (not just closed)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Validate branch name
+        id: validate
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          
+          # Validate branch name - prevent path traversal and injection
+          if [[ "$BRANCH" =~ \.\. ]] || [[ "$BRANCH" =~ // ]] || [[ "$BRANCH" =~ ^/ ]] || [[ "$BRANCH" =~ /$ ]]; then
+            echo "Invalid branch name: $BRANCH"
+            exit 1
+          fi
+          
+          # Ensure branch name is reasonable (alphanumeric, hyphens, underscores, slashes)
+          if ! [[ "$BRANCH" =~ ^[a-zA-Z0-9/_-]+$ ]]; then
+            echo "Branch name contains invalid characters: $BRANCH"
+            exit 1
+          fi
+          
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Record merged branch
+        env:
+          BRANCH: ${{ steps.validate.outputs.branch }}
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          RECORD_FILE="passed_branches/merged_branches.txt"
+          
+          # Create directory if it doesn't exist
+          mkdir -p passed_branches
+          
+          # Add branch name with timestamp
+          echo "$TIMESTAMP - $BRANCH" >> "$RECORD_FILE"
+          
+          # Sort the file to keep it organized (using temporary file for safety)
+          # Note: We keep all entries to preserve history of multiple merges
+          sort "$RECORD_FILE" -o "${RECORD_FILE}.tmp"
+          mv "${RECORD_FILE}.tmp" "$RECORD_FILE"
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add passed_branches/merged_branches.txt
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: record merged branch ${{ steps.validate.outputs.branch }}"
+            git push
+          fi
+
+      - name: Delete merged branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.validate.outputs.branch }}
+        run: |
+          # Delete the remote branch
+          git push origin --delete "$BRANCH" || echo "Failed to delete branch (may be already deleted or insufficient permissions)"

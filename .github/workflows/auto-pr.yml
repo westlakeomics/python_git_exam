@@ -1,0 +1,56 @@
+name: Auto Create PR
+
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - 'src/bad_style.py'
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if PR already exists
+        id: check-pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          # Check if a PR already exists for this branch
+          PR_COUNT=$(gh pr list --head "$BRANCH" --json number --jq 'length')
+          echo "pr_count=$PR_COUNT" >> $GITHUB_OUTPUT
+          if [ "$PR_COUNT" -gt 0 ]; then
+            echo "PR already exists for branch $BRANCH"
+          fi
+
+      - name: Create Pull Request
+        if: steps.check-pr.outputs.pr_count == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          gh pr create \
+            --title "Fix: PEP 8 compliance for bad_style.py - $BRANCH" \
+            --body "This PR fixes PEP 8 style issues in src/bad_style.py
+
+          Branch: \`$BRANCH\`
+
+          Changes will be automatically validated by CI checks:
+          - Linting (ruff)
+          - Formatting (black)
+          - Import sorting (isort)
+          - Unit tests (pytest)
+
+          Once all checks pass and the PR is merged, the branch will be automatically recorded and cleaned up." \
+            --base main \
+            --head "$BRANCH"
