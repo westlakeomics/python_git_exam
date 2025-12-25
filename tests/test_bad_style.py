@@ -10,12 +10,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 @pytest.fixture
 def add_src_to_path():
     """Add project root to sys.path for direct imports."""
+    path_added = False
     if str(PROJECT_ROOT) not in sys.path:
         sys.path.insert(0, str(PROJECT_ROOT))
+        path_added = True
+    
+    try:
         yield
-        sys.path.remove(str(PROJECT_ROOT))
-    else:
-        yield
+    finally:
+        if path_added and str(PROJECT_ROOT) in sys.path:
+            sys.path.remove(str(PROJECT_ROOT))
 
 
 def run_cmd(args, cwd=PROJECT_ROOT):
