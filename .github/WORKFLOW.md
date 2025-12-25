@@ -8,7 +8,8 @@
 
 GitHub Actions 默认无法创建 Pull Request。管理员需要启用相应权限：
 
-👉 **[查看详细设置指南](SETUP_GUIDE.md)** 👈
+- ⚡ **[5分钟快速设置清单](QUICK_SETUP.md)** - 推荐新手
+- 📖 **[完整设置指南](SETUP_GUIDE.md)** - 详细说明和故障排除
 
 **快速设置步骤**：
 1. 进入仓库 **Settings** → **Actions** → **General**
