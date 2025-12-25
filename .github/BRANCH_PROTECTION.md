@@ -2,6 +2,8 @@
 
 This document describes how to configure branch protection rules for the `main` branch to prevent force pushes and unauthorized merges.
 
+> **⚠️ 先决条件**: 在配置分支保护前，请先完成 [GitHub Actions 权限设置](SETUP_GUIDE.md)，以确保自动 PR 创建功能正常工作。
+
 ## Required Settings
 
 To ensure the main branch is properly protected, configure the following settings in GitHub:

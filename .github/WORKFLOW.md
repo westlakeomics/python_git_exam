@@ -2,6 +2,23 @@
 
 本项目实现了完全自动化的 PR 管理流程，满足以下需求：
 
+## ⚠️ 首次设置要求
+
+**在使用自动化工作流之前，仓库管理员必须完成一次性配置！**
+
+GitHub Actions 默认无法创建 Pull Request。管理员需要启用相应权限：
+
+- ⚡ **[5分钟快速设置清单](QUICK_SETUP.md)** - 推荐新手
+- 📖 **[完整设置指南](SETUP_GUIDE.md)** - 详细说明和故障排除
+
+**快速设置步骤**：
+1. 进入仓库 **Settings** → **Actions** → **General**
+2. 滚动到 **Workflow permissions** 部分
+3. ✅ 勾选 **"Allow GitHub Actions to create and approve pull requests"**
+4. 点击 **Save**
+
+完成此设置后，以下自动化功能将正常工作。
+
 ## 功能概述
 
 当用户修改 `src/bad_style.py` 并推送到新分支后：
@@ -142,10 +159,28 @@ git push origin test/auto-pr-test
 
 ## 故障排除
 
+### ⚠️ PR 创建失败：权限错误
+
+**错误信息**：
+```
+pull request create failed: GraphQL: GitHub Actions is not permitted to create or approve pull requests
+```
+
+**原因**：GitHub Actions 默认没有创建 PR 的权限
+
+**解决方案**：
+1. 👉 查看 [SETUP_GUIDE.md](SETUP_GUIDE.md) 获取详细设置说明
+2. 快速修复：
+   - 进入仓库 **Settings** → **Actions** → **General**
+   - 找到 **Workflow permissions** 部分
+   - ✅ 勾选 "Allow GitHub Actions to create and approve pull requests"
+   - 点击 **Save**
+
 ### PR 未自动创建
 
 - 确认修改了 `src/bad_style.py`
 - 确认不是推送到 main 分支
+- 确认已启用 GitHub Actions 创建 PR 的权限（见上）
 - 检查 Actions 标签页的工作流运行日志
 
 ### 验证失败

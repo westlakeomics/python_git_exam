@@ -1,5 +1,7 @@
 name: Auto Create PR
 
+# Triggers when users push changes to src/bad_style.py on non-main branches
+# 用户推送 src/bad_style.py 的修改到非 main 分支时自动触发
 on:
   push:
     branches-ignore:
@@ -10,10 +12,13 @@ on:
 jobs:
   create-pr:
     runs-on: ubuntu-latest
+    # Required permissions for creating PRs
+    # Note: Repository must have "Allow GitHub Actions to create and approve pull requests" enabled
+    # See .github/SETUP_GUIDE.md for setup instructions
     permissions:
       contents: write
       pull-requests: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,7 +44,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           BRANCH="${{ github.ref_name }}"
-          gh pr create \
+
+          # Attempt to create PR
+          # If this fails with "GitHub Actions is not permitted to create or approve pull requests",
+          # see .github/SETUP_GUIDE.md for configuration instructions
+          if ! gh pr create \
             --title "Fix: PEP 8 compliance for bad_style.py - $BRANCH" \
             --body "This PR fixes PEP 8 style issues in src/bad_style.py
 
@@ -53,4 +62,12 @@ jobs:
 
           Once all checks pass and the PR is merged, the branch will be automatically recorded and cleaned up." \
             --base main \
-            --head "$BRANCH"
+            --head "$BRANCH"; then
+
+            echo "::error::Failed to create PR. This is likely because:"
+            echo "::error::1. GitHub Actions is not permitted to create pull requests"
+            echo "::error::2. Repository Settings → Actions → General → Workflow permissions"
+            echo "::error::3. Enable: 'Allow GitHub Actions to create and approve pull requests'"
+            echo "::error::See .github/SETUP_GUIDE.md for detailed instructions"
+            exit 1
+          fi
